@@ -12,14 +12,18 @@
 | 添加供应商时隐藏第三方中转、聚合平台和赞助商推广预设 | `src/config/tehui.ts`、`ProviderPresetSelector.tsx` |
 | 内置「特惠 API」预设（Claude Code、Codex），在「全部」里排在「自定义配置」旁边 | `src/config/tehui.ts`、`claudeProviderPresets.ts` / `codexProviderPresets.ts` 末尾 |
 | 自动更新改用本 fork 的签名密钥和下载地址 | `src-tauri/tauri.conf.json` 的 `plugins.updater` |
-| 「查看更新说明」「下载页」等链接指向本 fork | `AboutSection.tsx`、`DatabaseUpgrade.tsx`、`src-tauri/src/commands/misc.rs` |
+| 「更新日志」「近期更新」「界面改版」等发布说明链接指向本 fork 的发布页，下载页指向 docs.tehui.xyz | `src/config/tehui.ts`、`whatsNew.ts`、`AboutSection.tsx`、`NewLayoutDialog.tsx`、`DatabaseUpgrade.tsx`、`src-tauri/src/commands/misc.rs` |
+| 关于页去掉 GitHub 按钮和邀 Star 条，「官方网站」和托盘菜单「打开官方网站」指向特惠 API | `AboutSection.tsx`、`src-tauri/src/tray.rs` |
+| 选择图标只列模型厂商、云服务商和常用工具（白名单），不列中转站 logo | `src/config/tehui.ts` 的 `PICKABLE_ICONS`、`IconPicker.tsx` |
+| 编辑旧的赞助商供应商时不显示合作伙伴推广语 | `ApiKeySection.tsx` |
 | 发布流程只出 Windows 和 macOS；macOS 用 ad-hoc 签名、不公证；额外产出服务器部署包 | `.github/workflows/release.yml`、`scripts/tehui-server-bundle.mjs` |
 | 删除上游专用的自动化（R2 同步、Claude 机器人、标签、过期 issue、WSL 夜间测试、赞助、依赖更新） | `.github/` |
 
 说明：
 
 - 隐藏规则看预设的分类（`third_party`、`aggregator`）和赞助标记（`isPartner`、`primePartner`），上游以后新加的推广预设会被自动隐藏，不用逐个处理。
-- 单测环境（`MODE=test`）下不隐藏，上游那批按名称点选第三方平台的测试照常通过；本 fork 的行为由 `tests/components/TehuiFork.test.tsx` 覆盖。
+- 单测环境（`MODE=test`）下不隐藏，上游那批按名称点选第三方平台的测试照常通过；本 fork 的行为由 `tests/components/TehuiFork.test.tsx` 和 `TehuiForkLinks.test.tsx` 覆盖。
+- 上游测试里写死官网地址的三处（`whatsNew.test.ts`、`WhatsNewNotice.test.tsx`、`NewLayoutDialog.test.tsx`）已改成本 fork 的发布页，同步上游冲突时保留本 fork 的地址。
 - 已经从推广预设添加过的供应商不受影响，照常显示和使用，只是编辑时不再提供切换到其他推广版本的入口。
 - 特惠 API 预设追加在列表末尾，上游预设的下标不变（编辑旧供应商时靠下标找回预设）。
 

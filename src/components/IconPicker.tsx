@@ -11,6 +11,7 @@ import { ProviderIcon } from "./ProviderIcon";
 import { ProviderIconBox } from "./ProviderIconBox";
 import { iconList } from "@/icons/extracted";
 import { searchIcons, getIconMetadata } from "@/icons/extracted/metadata";
+import { isPickableIcon } from "@/config/tehui";
 import { cn } from "@/lib/utils";
 import { toast } from "@/lib/toast";
 import type { CustomIconEntry } from "@/lib/api/customIcons";
@@ -153,10 +154,11 @@ export const IconPicker: React.FC<IconPickerProps> = ({
   const query = searchQuery.trim().toLowerCase();
 
   // 过滤图标列表
-  const filteredIcons = useMemo(() => {
-    if (!query) return iconList;
-    return searchIcons(query);
-  }, [query]);
+  // fork：内置图标只列模型厂商、云服务商和常用工具，不列中转站 logo
+  const filteredIcons = useMemo(
+    () => (query ? searchIcons(query) : iconList).filter(isPickableIcon),
+    [query],
+  );
 
   const filteredLibrary = useMemo(
     () =>

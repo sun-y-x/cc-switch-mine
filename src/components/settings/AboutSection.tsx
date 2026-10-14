@@ -2,14 +2,11 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Download,
   ExternalLink,
-  Github,
   Globe,
   Info,
   Loader2,
   RefreshCw,
   Sparkles,
-  Star,
-  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
@@ -22,7 +19,7 @@ import { WhatsNewDialog } from "@/components/WhatsNewDialog";
 import { WHATS_NEW_ENTRIES, entriesUpTo } from "@/lib/whatsNew";
 import appIcon from "@/assets/icons/app-icon.png";
 import { extractErrorMessage } from "@/utils/errorUtils";
-import { FORK_RELEASES_URL } from "@/config/tehui";
+import { TEHUI_SITE, forkReleaseUrl } from "@/config/tehui";
 
 interface AboutSectionProps {
   isPortable: boolean;
@@ -30,17 +27,6 @@ interface AboutSectionProps {
 
 // 应用自身版本（getVersion，本地毫秒级、无网络）也缓存一份，纯为重挂时免去 loading 闪烁。
 let appVersionCache: string | null = null;
-
-// 邀 Star 条关掉后记在本机（纯界面偏好，不进库、不随云同步）
-const STAR_PROMPT_DISMISSED_KEY = "ccswitch:about:starPromptDismissed";
-
-function readStarPromptDismissed(): boolean {
-  try {
-    return localStorage.getItem(STAR_PROMPT_DISMISSED_KEY) === "1";
-  } catch {
-    return false;
-  }
-}
 
 /**
  * 设置 → 关于：版本、便携模式、检查更新 / 安装并重启、项目链接。
@@ -56,9 +42,6 @@ export function AboutSection({ isPortable }: AboutSectionProps) {
   );
   const [isDownloading, setIsDownloading] = useState(false);
   const [whatsNewOpen, setWhatsNewOpen] = useState(false);
-  const [starPromptDismissed, setStarPromptDismissed] = useState(
-    readStarPromptDismissed,
-  );
   const recentEntries = useMemo(
     () => (version ? entriesUpTo(WHATS_NEW_ENTRIES, version) : []),
     [version],
@@ -97,39 +80,13 @@ export function AboutSection({ isPortable }: AboutSectionProps) {
   const handleOpenReleaseNotes = useCallback(async () => {
     try {
       const targetVersion = updateInfo?.availableVersion ?? version ?? "";
-      const displayVersion = targetVersion.startsWith("v")
-        ? targetVersion
-        : targetVersion
-          ? `v${targetVersion}`
-          : "";
-
-      if (!displayVersion) {
-        await settingsApi.openExternal(FORK_RELEASES_URL);
-        return;
-      }
-
       // fork：看本 fork 的发布说明，里面附有对应的上游版本说明
-      await settingsApi.openExternal(
-        `${FORK_RELEASES_URL}/tag/${displayVersion}`,
-      );
+      await settingsApi.openExternal(forkReleaseUrl(targetVersion));
     } catch (error) {
       console.error("[AboutSection] Failed to open release notes", error);
       toast.error(t("settings.openReleaseNotesFailed"));
     }
   }, [t, updateInfo?.availableVersion, version]);
-
-  const handleOpenGithub = useCallback(() => {
-    void settingsApi.openExternal("https://github.com/farion1231/cc-switch");
-  }, []);
-
-  const handleDismissStarPrompt = useCallback(() => {
-    setStarPromptDismissed(true);
-    try {
-      localStorage.setItem(STAR_PROMPT_DISMISSED_KEY, "1");
-    } catch {
-      // 存不下就只在本次会话里隐藏
-    }
-  }, []);
 
   const handleCheckUpdate = useCallback(async () => {
     if (hasUpdate) {
@@ -254,23 +211,13 @@ export function AboutSection({ isPortable }: AboutSectionProps) {
         </div>
       )}
 
+      {/* fork：去掉上游的 GitHub 按钮和邀 Star 条，「官方网站」指向特惠 API */}
       <div className="flex flex-wrap items-center gap-2 px-5 py-4">
-        {starPromptDismissed && (
-          <Button
-            type="button"
-            variant="neutral"
-            size="compact"
-            onClick={handleOpenGithub}
-          >
-            <Github className="h-3.5 w-3.5" />
-            {t("settings.github")}
-          </Button>
-        )}
         <Button
           type="button"
           variant="neutral"
           size="compact"
-          onClick={() => settingsApi.openExternal("https://ccswitch.io")}
+          onClick={() => settingsApi.openExternal(TEHUI_SITE)}
         >
           <Globe className="h-3.5 w-3.5" />
           {t("settings.officialWebsite")}
@@ -296,43 +243,6 @@ export function AboutSection({ isPortable }: AboutSectionProps) {
           </Button>
         )}
       </div>
-
-      {/* 下载与更新都走 ccswitch.io，用户不再经过仓库页，邀 Star 单独占一行；按钮即 GitHub 入口。
-          关掉后链接行补回 GitHub 按钮 */}
-      {!starPromptDismissed && (
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-3 bg-action-soft py-3.5 ps-5 pe-3">
-          <div className="flex min-w-0 flex-1 items-center gap-3">
-            <Star
-              aria-hidden="true"
-              className="h-5 w-5 shrink-0 animate-[spin_6s_linear_infinite] fill-amber-500 text-amber-500 motion-reduce:animate-none"
-            />
-            <p className="min-w-0 text-body text-fg-1">
-              {t("settings.starPrompt")}
-            </p>
-          </div>
-          <div className="flex shrink-0 items-center gap-1">
-            <Button
-              type="button"
-              variant="neutral"
-              size="compact"
-              onClick={handleOpenGithub}
-            >
-              <Github className="h-3.5 w-3.5" />
-              {t("settings.starOnGithub")}
-            </Button>
-            <Button
-              type="button"
-              variant="quiet"
-              size="icon-compact"
-              onClick={handleDismissStarPrompt}
-              aria-label={t("common.close")}
-              title={t("common.close")}
-            >
-              <X className="h-3.5 w-3.5" />
-            </Button>
-          </div>
-        </div>
-      )}
 
       <WhatsNewDialog
         open={whatsNewOpen}

@@ -18,9 +18,18 @@ export const TEHUI_KEYS_URL = `${TEHUI_SITE}/keys`;
  * 见 src-tauri/tauri.conf.json 的 updater.endpoints；Rust 侧 check_for_updates 用同一个地址。
  */
 export const FORK_DOWNLOAD_PAGE = "https://docs.tehui.xyz/download/cc-switch/";
-/** 本 fork 的 GitHub 发布页，更新说明里附有对应的上游版本说明 */
+/**
+ * 本 fork 的 GitHub 发布页，更新说明里附有对应的上游版本说明。
+ * 应用里「官方网站」指向 TEHUI_SITE；托盘菜单（src-tauri/src/tray.rs）用同一个地址。
+ */
 export const FORK_RELEASES_URL =
   "https://github.com/sun-y-x/cc-switch-mine/releases";
+
+/** 某个版本的发布说明；不带版本是发布列表 */
+export function forkReleaseUrl(version?: string): string {
+  if (!version) return FORK_RELEASES_URL;
+  return `${FORK_RELEASES_URL}/tag/${version.startsWith("v") ? version : `v${version}`}`;
+}
 
 /** 识别特惠 API 预设只看官网地址，不给各应用的预设类型加字段 */
 export function isTehuiPreset(preset: { websiteUrl?: string }): boolean {
@@ -59,4 +68,80 @@ export function withoutPromotedPresets<
 >(entries: T[]): T[] {
   if (!promotedPresetsHidden()) return entries;
   return entries.filter((entry) => !isPromotedPreset(entry.preset));
+}
+
+/**
+ * 选择图标时只列这些：模型厂商、云服务商和常用工具。上游内置的图标大多是各家中转站的
+ * logo，等于替它们做展示，一律不列。用白名单而不是黑名单：上游新加的中转站图标默认不出现。
+ * 已经用着某个图标的供应商不受影响，照常显示。
+ */
+const PICKABLE_ICONS = new Set([
+  // 模型厂商
+  "anthropic",
+  "claude",
+  "openai",
+  "gemini",
+  "google",
+  "gemma",
+  "palm",
+  "deepseek",
+  "kimi",
+  "zhipu",
+  "chatglm",
+  "qwen",
+  "qianwenai",
+  "qwencloud",
+  "alibaba",
+  "bailian",
+  "modelscope",
+  "baidu",
+  "wenxin",
+  "tencent",
+  "hunyuan",
+  "bytedance",
+  "doubao",
+  "huoshan",
+  "byteplus",
+  "minimax",
+  "stepfun",
+  "xiaomimimo",
+  "longcat",
+  "catcoder",
+  "bailing",
+  "astron",
+  "yi",
+  "zeroone",
+  "meta",
+  "mistral",
+  "cohere",
+  "perplexity",
+  "xai",
+  "grok",
+  "nvidia",
+  "stability",
+  "midjourney",
+  "huggingface",
+  "ollama",
+  // 云服务商
+  "aws",
+  "azure",
+  "googlecloud",
+  "cloudflare",
+  "huawei",
+  "vercel",
+  // 工具与客户端
+  "github",
+  "githubcopilot",
+  "copilot",
+  "notion",
+  "mcp",
+  "newapi",
+  "opencode",
+  "openclaw",
+  "hermes",
+  "pi",
+]);
+
+export function isPickableIcon(name: string): boolean {
+  return !promotedPresetsHidden() || PICKABLE_ICONS.has(name.toLowerCase());
 }

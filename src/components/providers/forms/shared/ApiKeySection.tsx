@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import ApiKeyInput from "../ApiKeyInput";
 import type { ProviderCategory } from "@/types";
+import { promotedPresetsHidden } from "@/config/tehui";
 
 interface ApiKeySectionProps {
   id?: string;
@@ -55,8 +56,9 @@ export function ApiKeySection({
 
   const showLink = shouldShowLink && Boolean(websiteUrl);
   // 推广语跟着「获取 API Key」走，按输入框说明文字的样式写在框下面（v7 不画推广框）
+  // fork：不显示上游合作伙伴的推广语
   const promotion =
-    showLink && partnerPromotionKey
+    showLink && partnerPromotionKey && !promotedPresetsHidden()
       ? t(`providerForm.partnerPromotion.${partnerPromotionKey}`, {
           defaultValue: "",
         })
