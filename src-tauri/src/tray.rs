@@ -2730,7 +2730,10 @@ pub fn handle_tray_menu_event(app: &tauri::AppHandle, event_id: &str) {
         "show_main" => show_main_window(app),
         "open_website" => {
             // fork：「打开官方网站」指向特惠 API（与 src/config/tehui.ts 的 TEHUI_SITE 一致）
-            if let Err(e) = app.opener().open_url("https://api.tehui.xyz", None::<String>) {
+            if let Err(e) = app
+                .opener()
+                .open_url("https://api.tehui.xyz", None::<String>)
+            {
                 log::error!("打开官方网站失败: {e}");
             }
         }
