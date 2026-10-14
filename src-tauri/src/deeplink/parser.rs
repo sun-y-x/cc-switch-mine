@@ -89,9 +89,19 @@ fn parse_provider_deeplink(
         .clone();
 
     // Validate app type
+    // fork：放开 claude-desktop，控制台能一键导入到 Claude 桌面版。下游 build_provider_from_request
+    // 本来就支持它（按直连写入），上游只是没在这里放行。
     if !matches!(
         app.as_str(),
-        "claude" | "codex" | "gemini" | "grokbuild" | "opencode" | "openclaw" | "hermes" | "pi"
+        "claude"
+            | "claude-desktop"
+            | "codex"
+            | "gemini"
+            | "grokbuild"
+            | "opencode"
+            | "openclaw"
+            | "hermes"
+            | "pi"
     ) {
         return Err(AppError::InvalidInput(format!(
             "Invalid provider app type: '{app}'"

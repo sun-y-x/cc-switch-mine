@@ -5,6 +5,7 @@ import {
   ProviderPresetSelector,
   type PresetEntry,
 } from "@/components/providers/forms/ProviderPresetSelector";
+import { claudeDesktopProviderPresets } from "@/config/claudeDesktopProviderPresets";
 import { providerPresets } from "@/config/claudeProviderPresets";
 import { codexProviderPresets } from "@/config/codexProviderPresets";
 import { geminiProviderPresets } from "@/config/geminiProviderPresets";
@@ -56,9 +57,24 @@ describe("fork：特惠 API 预设", () => {
     expect(codex[0].auth).toEqual({ OPENAI_API_KEY: "" });
   });
 
+  it("Claude 桌面版也有一个：直连、不写模型，让桌面版自己读模型列表", () => {
+    const desktop = claudeDesktopProviderPresets.filter(isTehuiPreset);
+    expect(desktop).toHaveLength(1);
+    expect(desktop[0]).toMatchObject({
+      name: TEHUI_NAME,
+      apiKeyUrl: TEHUI_KEYS_URL,
+      baseUrl: TEHUI_SITE,
+      mode: "direct",
+      apiFormat: "anthropic",
+    });
+    expect(desktop[0].modelRoutes).toBeUndefined();
+    expect(isPromotedPreset(desktop[0])).toBe(false);
+  });
+
   it("追加在上游预设末尾，不改变上游预设的下标", () => {
     expect(isTehuiPreset(providerPresets.at(-1)!)).toBe(true);
     expect(isTehuiPreset(codexProviderPresets.at(-1)!)).toBe(true);
+    expect(isTehuiPreset(claudeDesktopProviderPresets.at(-1)!)).toBe(true);
   });
 });
 
@@ -84,6 +100,10 @@ describe("fork：隐藏推广预设", () => {
       codex: codexEntries,
       gemini: geminiProviderPresets.map((preset, index) => ({
         id: `gemini-${index}`,
+        preset,
+      })),
+      "claude-desktop": claudeDesktopProviderPresets.map((preset, index) => ({
+        id: `claude-desktop-${index}`,
         preset,
       })),
     };

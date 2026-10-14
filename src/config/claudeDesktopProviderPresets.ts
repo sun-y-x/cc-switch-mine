@@ -11,6 +11,7 @@
 import { ProviderCategory } from "../types";
 import type { PresetTheme } from "./claudeProviderPresets";
 import type { PresetFamilyFields } from "./presetFamilies";
+import { TEHUI_KEYS_URL, TEHUI_NAME, TEHUI_SITE } from "./tehui";
 
 export type ClaudeDesktopApiFormat =
   | "anthropic"
@@ -1892,5 +1893,16 @@ export const claudeDesktopProviderPresets: ClaudeDesktopProviderPreset[] = [
       "claude-haiku-4-5-20251001",
     ),
     icon: "aicoming",
+  },
+  // ===== fork：特惠 API（见 src/config/tehui.ts），放在末尾，不改动上游预设的下标 =====
+  // 直连、不写模型：Claude 桌面版自己读 /v1/models，和控制台一键导入写入的配置一致
+  {
+    name: TEHUI_NAME,
+    websiteUrl: TEHUI_SITE,
+    apiKeyUrl: TEHUI_KEYS_URL,
+    category: "third_party",
+    baseUrl: TEHUI_SITE,
+    mode: "direct",
+    apiFormat: "anthropic",
   },
 ];

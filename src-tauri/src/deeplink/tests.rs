@@ -219,6 +219,27 @@ fn test_parse_rejects_config_url_up_front() {
     assert!(err.to_string().contains("configUrl"), "{err}");
 }
 
+/// fork：控制台一键导入到 Claude 桌面版，导入后按直连写入，Key 和地址都在 env 里
+#[test]
+fn test_parse_claude_desktop_provider_as_direct() {
+    use super::provider::build_provider_from_request;
+    use crate::provider::ClaudeDesktopMode;
+
+    let url = "ccswitch://v1/import?resource=provider&app=claude-desktop&name=Desktop&endpoint=https%3A%2F%2Fapi.example.com&apiKey=sk-test&homepage=https%3A%2F%2Fapi.example.com&enabled=true";
+
+    let request = parse_deeplink_url(url).expect("claude-desktop is a valid provider app");
+    assert_eq!(request.app.as_deref(), Some("claude-desktop"));
+
+    let provider = build_provider_from_request(&AppType::ClaudeDesktop, &request).unwrap();
+    assert_eq!(
+        provider.meta.and_then(|meta| meta.claude_desktop_mode),
+        Some(ClaudeDesktopMode::Direct)
+    );
+    let env = &provider.settings_config["env"];
+    assert_eq!(env["ANTHROPIC_BASE_URL"], "https://api.example.com");
+    assert_eq!(env["ANTHROPIC_AUTH_TOKEN"], "sk-test");
+}
+
 /// 下游 parse_mcp_apps 与 McpService 都支持 Pi / MiniMax Code，解析层不能先把它们拦掉
 #[test]
 fn test_parse_mcp_deeplink_accepts_pi_and_mcode() {

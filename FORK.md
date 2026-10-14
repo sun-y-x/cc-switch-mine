@@ -10,7 +10,8 @@
 | 改动 | 位置 |
 | --- | --- |
 | 添加供应商时隐藏第三方中转、聚合平台和赞助商推广预设 | `src/config/tehui.ts`、`ProviderPresetSelector.tsx` |
-| 内置「特惠 API」预设（Claude Code、Codex），在「全部」里排在「自定义配置」旁边 | `src/config/tehui.ts`、`claudeProviderPresets.ts` / `codexProviderPresets.ts` 末尾 |
+| 内置「特惠 API」预设（Claude Code、Claude 桌面版、Codex），在「全部」里排在「自定义配置」旁边 | `src/config/tehui.ts`、`claudeProviderPresets.ts` / `claudeDesktopProviderPresets.ts` / `codexProviderPresets.ts` 末尾 |
+| 一键导入链接支持 `app=claude-desktop`（按直连写入），控制台可以直接导入到 Claude 桌面版 | `src-tauri/src/deeplink/parser.rs`、`src/lib/api/deeplink.ts`、`DeepLinkImportDialog.tsx` |
 | 自动更新改用本 fork 的签名密钥和下载地址 | `src-tauri/tauri.conf.json` 的 `plugins.updater` |
 | 「更新日志」「近期更新」「界面改版」等发布说明链接指向本 fork 的发布页，下载页指向 docs.tehui.xyz | `src/config/tehui.ts`、`whatsNew.ts`、`AboutSection.tsx`、`NewLayoutDialog.tsx`、`DatabaseUpgrade.tsx`、`src-tauri/src/commands/misc.rs` |
 | 关于页去掉 GitHub 按钮和邀 Star 条，「官方网站」和托盘菜单「打开官方网站」指向特惠 API | `AboutSection.tsx`、`src-tauri/src/tray.rs` |
@@ -62,7 +63,8 @@ git merge upstream/main          # 或者 merge 某个上游版本的提交
 可能冲突的地方和处理方式：
 
 - `tauri.conf.json` 的 `version`：取上游的；`plugins.updater` 保留本 fork 的。
-- `claudeProviderPresets.ts` / `codexProviderPresets.ts` 末尾：两边都保留，特惠 API 预设保持在最后。
+- `claudeProviderPresets.ts` / `claudeDesktopProviderPresets.ts` / `codexProviderPresets.ts` 末尾：两边都保留，特惠 API 预设保持在最后。
+- `deeplink/parser.rs` 的应用白名单：保留 `claude-desktop`；上游如果自己放开了，用上游的写法即可。
 - `tests/components/ProviderPresetSelector.test.tsx` 的预设行数：取上游的数字再 +1。
 - `.github/workflows/release.yml`：保留本 fork 的版本，再看上游这次改了什么、要不要搬过来。
 - 被删除的工作流如果上游改过：继续删除。
