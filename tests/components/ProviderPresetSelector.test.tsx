@@ -230,7 +230,8 @@ describe("preset families", () => {
     const claudeEntries = providerPresets
       .filter((item) => !item.hidden)
       .map((item, index) => ({ id: `claude-${index}`, preset: item }));
-    expect(groupPresetRows(claudeEntries)).toHaveLength(84);
+    // fork：+1 是末尾追加的特惠 API 预设；同步上游冲突时取上游的数字再 +1
+    expect(groupPresetRows(claudeEntries)).toHaveLength(84 + 1);
   });
 
   it("orders plans and regions as the design does where a family says so", () => {

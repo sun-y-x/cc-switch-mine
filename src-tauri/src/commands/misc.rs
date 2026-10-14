@@ -70,15 +70,13 @@ pub async fn copy_text_to_clipboard(text: String) -> Result<bool, String> {
     .map_err(|e| format!("剪贴板任务执行失败: {e}"))?
 }
 
-/// 检查更新
+/// 检查更新：打开下载页（便携版、或自动更新失败时的兜底）
+/// fork：指向本 fork 的下载页，与 src/config/tehui.ts 的 FORK_DOWNLOAD_PAGE 保持一致
 #[tauri::command]
 pub async fn check_for_updates(handle: AppHandle) -> Result<bool, String> {
     handle
         .opener()
-        .open_url(
-            "https://github.com/farion1231/cc-switch/releases/latest",
-            None::<String>,
-        )
+        .open_url("https://docs.tehui.xyz/download/cc-switch/", None::<String>)
         .map_err(|e| format!("打开更新页面失败: {e}"))?;
 
     Ok(true)

@@ -22,6 +22,7 @@ import { WhatsNewDialog } from "@/components/WhatsNewDialog";
 import { WHATS_NEW_ENTRIES, entriesUpTo } from "@/lib/whatsNew";
 import appIcon from "@/assets/icons/app-icon.png";
 import { extractErrorMessage } from "@/utils/errorUtils";
+import { FORK_RELEASES_URL } from "@/config/tehui";
 
 interface AboutSectionProps {
   isPortable: boolean;
@@ -103,14 +104,13 @@ export function AboutSection({ isPortable }: AboutSectionProps) {
           : "";
 
       if (!displayVersion) {
-        await settingsApi.openExternal(
-          "https://github.com/farion1231/cc-switch/releases",
-        );
+        await settingsApi.openExternal(FORK_RELEASES_URL);
         return;
       }
 
+      // fork：看本 fork 的发布说明，里面附有对应的上游版本说明
       await settingsApi.openExternal(
-        `https://github.com/farion1231/cc-switch/releases/tag/${displayVersion}`,
+        `${FORK_RELEASES_URL}/tag/${displayVersion}`,
       );
     } catch (error) {
       console.error("[AboutSection] Failed to open release notes", error);

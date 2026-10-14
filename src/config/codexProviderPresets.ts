@@ -10,6 +10,7 @@ import type {
 } from "../types";
 import type { PresetTheme } from "./claudeProviderPresets";
 import type { PresetFamilyFields } from "./presetFamilies";
+import { TEHUI_KEYS_URL, TEHUI_NAME, TEHUI_SITE } from "./tehui";
 
 // MiMo 官方 Codex 目录的系统提示词。
 // https://mimo.mi.com/docs/tokenplan/integration/codex-configuration
@@ -3873,5 +3874,14 @@ base_url = "https://cc-api.pipellm.ai/v1"`,
       "gpt-5.6-sol",
     ),
     icon: "aicoming",
+  },
+  // ===== fork：特惠 API（见 src/config/tehui.ts），放在末尾，不改动上游预设的下标 =====
+  {
+    name: TEHUI_NAME,
+    websiteUrl: TEHUI_SITE,
+    apiKeyUrl: TEHUI_KEYS_URL,
+    category: "third_party",
+    auth: generateThirdPartyAuth(""),
+    config: generateThirdPartyConfig(TEHUI_NAME, `${TEHUI_SITE}/v1`),
   },
 ];

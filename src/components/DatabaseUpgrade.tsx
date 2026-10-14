@@ -13,8 +13,10 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { FORK_DOWNLOAD_PAGE } from "@/config/tehui";
 
-const RELEASES_URL = "https://github.com/farion1231/cc-switch/releases";
+// fork：引导到本 fork 的下载页，不去上游发布页
+const RELEASES_URL = FORK_DOWNLOAD_PAGE;
 
 interface DatabaseUpgradeProps {
   payload: {

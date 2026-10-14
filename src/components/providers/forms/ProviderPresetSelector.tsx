@@ -23,6 +23,7 @@ import {
   type UniversalProviderPreset,
 } from "@/config/universalProviderPresets";
 import { cn } from "@/lib/utils";
+import { isTehuiPreset, withoutPromotedPresets } from "@/config/tehui";
 import { usePresetStep } from "./presetStep";
 import { SegmentedControl } from "@/components/ui/segmented-control";
 import {
@@ -145,6 +146,18 @@ export function ProviderPresetSelector({
   onUniversalPresetSelect,
   onManageUniversalProviders,
 }: Readonly<ProviderPresetSelectorProps>) {
+  // fork：选预设的列表里不展示中转 / 聚合平台和赞助商推广（src/config/tehui.ts）。
+  // 预设条仍按完整列表查，编辑已有供应商时照常认出它来自哪个预设。
+  const pickableEntries = useMemo(
+    () => withoutPromotedPresets(presetEntries),
+    [presetEntries],
+  );
+  // 被隐藏的预设（编辑旧供应商时会遇到）不提供版本切换，免得切回推广版本
+  const versionsOf = (entry: PresetEntry) =>
+    presetVersions(
+      pickableEntries.includes(entry) ? pickableEntries : [entry],
+      entry,
+    );
   const step = usePresetStep();
   const registerSelector = step?.registerSelector;
   useEffect(() => registerSelector?.(), [registerSelector]);
@@ -158,7 +171,7 @@ export function ProviderPresetSelector({
     return createPortal(
       <PresetPicker
         appId={step.appId}
-        entries={presetEntries}
+        entries={pickableEntries}
         onPick={pick}
         onUniversalPresetSelect={onUniversalPresetSelect}
         onManageUniversalProviders={onManageUniversalProviders}
@@ -174,12 +187,12 @@ export function ProviderPresetSelector({
 
   if (!step) {
     // 没有两步外壳（单独渲染的表单）：就地显示选择列表，选中多版本的那一家时下面跟版本切换
-    const versions = entry ? presetVersions(presetEntries, entry) : [];
+    const versions = entry ? versionsOf(entry) : [];
     return (
       <div className="space-y-3" data-preset-selector="">
         <div className="h-[420px] overflow-hidden rounded-panel border border-border">
           <PresetPicker
-            entries={presetEntries}
+            entries={pickableEntries}
             onPick={onPresetChange}
             selectedPresetId={selectedPresetId}
             onUniversalPresetSelect={onUniversalPresetSelect}
@@ -201,7 +214,7 @@ export function ProviderPresetSelector({
     <PresetBar
       appId={step.appId}
       entry={entry}
-      versions={entry ? presetVersions(presetEntries, entry) : []}
+      versions={entry ? versionsOf(entry) : []}
       onChange={() => step.setStep("pick")}
       // 换版本 = 选了同一家的另一个预设，表单按它重填
       onVersionChange={onPresetChange}
@@ -757,25 +770,31 @@ function PresetPicker({
             </div>
           ) : category === "all" ? (
             // 「全部」按左侧分类分段，段内按名称；自定义配置固定在最上面
+            // fork：特惠 API 跟在自定义配置旁边，不再出现在下面的分段里
             <div className="flex flex-col gap-4">
-              <div className="grid grid-cols-2 gap-2">{customRow}</div>
-              {sectionPresetRows(shown).map((section) => (
-                <section
-                  key={section.group}
-                  aria-labelledby={`preset-section-${section.group}`}
-                  className="flex flex-col gap-2"
-                >
-                  <h3
-                    id={`preset-section-${section.group}`}
-                    className="px-0.5 text-caption font-medium text-fg-2"
+              <div className="grid grid-cols-2 gap-2">
+                {customRow}
+                {shown.filter(isTehuiRow).map(renderRow)}
+              </div>
+              {sectionPresetRows(shown.filter((item) => !isTehuiRow(item))).map(
+                (section) => (
+                  <section
+                    key={section.group}
+                    aria-labelledby={`preset-section-${section.group}`}
+                    className="flex flex-col gap-2"
                   >
-                    {t(`providerPreset.group.${section.group}`)}
-                  </h3>
-                  <div className="grid grid-cols-2 gap-2">
-                    {section.items.map(renderRow)}
-                  </div>
-                </section>
-              ))}
+                    <h3
+                      id={`preset-section-${section.group}`}
+                      className="px-0.5 text-caption font-medium text-fg-2"
+                    >
+                      {t(`providerPreset.group.${section.group}`)}
+                    </h3>
+                    <div className="grid grid-cols-2 gap-2">
+                      {section.items.map(renderRow)}
+                    </div>
+                  </section>
+                ),
+              )}
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-2">
@@ -787,6 +806,10 @@ function PresetPicker({
       </div>
     </div>
   );
+}
+
+function isTehuiRow({ row }: VisiblePresetRow): boolean {
+  return row.versions.some((entry) => isTehuiPreset(entry.preset));
 }
 
 /**

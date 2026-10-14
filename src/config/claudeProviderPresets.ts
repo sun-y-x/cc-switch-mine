@@ -3,6 +3,7 @@
  */
 import { ProviderCategory } from "../types";
 import type { PresetFamilyFields } from "./presetFamilies";
+import { TEHUI_KEYS_URL, TEHUI_NAME, TEHUI_SITE } from "./tehui";
 
 export interface TemplateValueConfig {
   label: string;
@@ -2326,5 +2327,18 @@ export const providerPresets: ProviderPreset[] = [
     },
     category: "aggregator",
     icon: "aicoming",
+  },
+  // ===== fork：特惠 API（见 src/config/tehui.ts），放在末尾，不改动上游预设的下标 =====
+  {
+    name: TEHUI_NAME,
+    websiteUrl: TEHUI_SITE,
+    apiKeyUrl: TEHUI_KEYS_URL,
+    settingsConfig: {
+      env: {
+        ANTHROPIC_BASE_URL: TEHUI_SITE,
+        ANTHROPIC_AUTH_TOKEN: "",
+      },
+    },
+    category: "third_party",
   },
 ];
